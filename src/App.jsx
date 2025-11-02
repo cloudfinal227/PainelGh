@@ -1,11 +1,5 @@
 import React, { useState } from 'react';
-import CustomerForm from './components/CustomerForm';
-import ItemForm from './components/ItemForm';
-import ItemsList from './components/ItemsList';
-import DeliverySummary from './components/DeliverySummary';
-import OrdersList from './components/OrdersList';
-import DeliveryByVehicle from './components/DeliveryByVehicle';
-import { orderService } from './services/orderService';
+import CustomerForm from './components/CustomerForm.jsx';
 import './index.css';
 
 function App() {
@@ -27,72 +21,6 @@ function App() {
 
   const handleAddItem = (item) => {
     setItems(prevItems => [...prevItems, item]);
-  };
-
-  const handleRemoveItem = (itemId) => {
-    setItems(prevItems => prevItems.filter(item => item.id !== itemId));
-  };
-
-  const handleFinalize = async () => {
-    setIsLoading(true);
-    
-    const orderData = {
-      customer,
-      items,
-      total: items.reduce((sum, item) => sum + item.totalPrice, 0),
-      createdAt: new Date().toISOString(),
-      id: Date.now()
-    };
-
-    // Formatar endereço para exibição
-    const formatAddress = (address) => {
-      if (!address) return '';
-      if (typeof address === 'string') return address;
-      
-      const { street, number, neighborhood, city } = address;
-      const parts = [];
-      
-      if (street) parts.push(street);
-      if (number) parts.push(`nº ${number}`);
-      if (neighborhood) parts.push(neighborhood);
-      if (city) parts.push(city);
-      
-      return parts.join(', ');
-    };
-
-    try {
-      // Salvar no Supabase
-      const result = await orderService.createOrder(orderData);
-      
-      if (result.success) {
-        alert(`Pedido finalizado com sucesso!\n\nCliente: ${customer.name}\nEndereço: ${formatAddress(customer.address)}\nItens: ${items.length}\nTotal: R$ ${orderData.total.toFixed(2)}\n\nPedido #${result.order.id} salvo no sistema.`);
-        
-        // Limpar formulário após finalizar
-        handleClear();
-      } else {
-        alert(`Erro ao salvar pedido: ${result.error}\n\nTente novamente ou contate o suporte.`);
-      }
-    } catch (error) {
-      console.error('Erro ao finalizar pedido:', error);
-      alert(`Erro inesperado ao salvar pedido.\n\nVerifique sua conexão e tente novamente.`);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleClear = () => {
-    setCustomer({
-      name: '',
-      phone: '',
-      address: {
-        city: '',
-        street: '',
-        number: '',
-        neighborhood: ''
-      },
-      notes: ''
-    });
-    setItems([]);
   };
 
   return (
@@ -143,32 +71,26 @@ function App() {
             onChange={setCustomer} 
           />
 
-          {/* Formulário de Itens */}
-          <ItemForm onAddItem={handleAddItem} />
-
-          {/* Lista de Itens */}
-          <ItemsList 
-            items={items} 
-            onRemoveItem={handleRemoveItem} 
-          />
-
-          {/* Resumo da Entrega */}
-          <DeliverySummary 
-            customer={customer}
-            items={items}
-            onFinalize={handleFinalize}
-            onClear={handleClear}
-            isLoading={isLoading}
-          />
+          <div className="form-section">
+            <h3>Outros Componentes</h3>
+            <p>Em desenvolvimento... Formulário do cliente funcionando!</p>
+            <p>Items: {items.length}</p>
+          </div>
         </>
       )}
 
       {currentView === 'orders-list' && (
-        <OrdersList />
+        <div className="form-section">
+          <h3>Lista de Pedidos</h3>
+          <p>Em desenvolvimento...</p>
+        </div>
       )}
 
       {currentView === 'delivery-by-vehicle' && (
-        <DeliveryByVehicle />
+        <div className="form-section">
+          <h3>Entregas por Veículo</h3>
+          <p>Em desenvolvimento...</p>
+        </div>
       )}
 
       {/* Footer */}
