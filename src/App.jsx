@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import CustomerForm from './components/CustomerForm.jsx';
 import './index.css';
 
 function App() {
+  const [currentView, setCurrentView] = useState('new-order');
   const [customer, setCustomer] = useState({
     name: '',
     phone: '',
@@ -15,12 +15,32 @@ function App() {
     notes: ''
   });
 
-  const [items, setItems] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [currentView, setCurrentView] = useState('new-order'); // 'new-order', 'orders-list', 'delivery-by-vehicle'
+  const cities = [
+    'Guarabira',
+    'Pirpirituba', 
+    'Pilõezinhos',
+    'Pirpiri',
+    'Cuitegi',
+    'Araçagi'
+  ];
 
-  const handleAddItem = (item) => {
-    setItems(prevItems => [...prevItems, item]);
+  const handleInputChange = (field, value) => {
+    setCustomer({
+      ...customer,
+      [field]: value
+    });
+  };
+
+  const handleAddressChange = (field, value) => {
+    const updatedAddress = {
+      ...customer.address,
+      [field]: value
+    };
+    
+    setCustomer({
+      ...customer,
+      address: updatedAddress
+    });
   };
 
   return (
@@ -40,21 +60,18 @@ function App() {
             <button 
               className={`btn ${currentView === 'new-order' ? 'btn-success' : 'btn-primary'}`}
               onClick={() => setCurrentView('new-order')}
-              style={{ display: 'flex', alignItems: 'center', gap: '5px' }}
             >
               ➕ Novo Pedido
             </button>
             <button 
               className={`btn ${currentView === 'orders-list' ? 'btn-success' : 'btn-primary'}`}
               onClick={() => setCurrentView('orders-list')}
-              style={{ display: 'flex', alignItems: 'center', gap: '5px' }}
             >
               📋 Ver Pedidos
             </button>
             <button 
               className={`btn ${currentView === 'delivery-by-vehicle' ? 'btn-success' : 'btn-primary'}`}
               onClick={() => setCurrentView('delivery-by-vehicle')}
-              style={{ display: 'flex', alignItems: 'center', gap: '5px' }}
             >
               🚚 Entregas
             </button>
@@ -62,34 +79,115 @@ function App() {
         </div>
       </div>
 
-      {/* Conteúdo baseado na view atual */}
+      {/* Conteúdo */}
       {currentView === 'new-order' && (
-        <>
-          {/* Formulário do Cliente */}
-          <CustomerForm 
-            customer={customer} 
-            onChange={setCustomer} 
-          />
+        <div className="form-section">
+          <h3>Dados do Cliente</h3>
+          
+          <div className="form-grid">
+            <div className="form-group">
+              <label>Nome do Cliente *</label>
+              <input
+                type="text"
+                value={customer.name}
+                onChange={(e) => handleInputChange('name', e.target.value)}
+                placeholder="Nome completo do cliente"
+              />
+            </div>
 
-          <div className="form-section">
-            <h3>Outros Componentes</h3>
-            <p>Em desenvolvimento... Formulário do cliente funcionando!</p>
-            <p>Items: {items.length}</p>
+            <div className="form-group">
+              <label>Telefone *</label>
+              <input
+                type="tel"
+                value={customer.phone}
+                onChange={(e) => handleInputChange('phone', e.target.value)}
+                placeholder="(11) 99999-9999"
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Cidade *</label>
+              <select
+                value={customer.address?.city || ''}
+                onChange={(e) => handleAddressChange('city', e.target.value)}
+              >
+                <option value="">Selecione a cidade</option>
+                {cities.map(city => (
+                  <option key={city} value={city}>{city}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="form-group">
+              <label>Rua *</label>
+              <input
+                type="text"
+                value={customer.address?.street || ''}
+                onChange={(e) => handleAddressChange('street', e.target.value)}
+                placeholder="Nome da rua"
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Número *</label>
+              <input
+                type="text"
+                value={customer.address?.number || ''}
+                onChange={(e) => handleAddressChange('number', e.target.value)}
+                placeholder="Número da casa"
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Bairro *</label>
+              <input
+                type="text"
+                value={customer.address?.neighborhood || ''}
+                onChange={(e) => handleAddressChange('neighborhood', e.target.value)}
+                placeholder="Nome do bairro"
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Observações</label>
+              <input
+                type="text"
+                value={customer.notes}
+                onChange={(e) => handleInputChange('notes', e.target.value)}
+                placeholder="Informações adicionais sobre a entrega"
+              />
+            </div>
           </div>
-        </>
+
+          <div style={{ marginTop: '20px', padding: '15px', backgroundColor: '#f0f9ff', borderRadius: '8px' }}>
+            <h4>Preview dos Dados:</h4>
+            <p><strong>Nome:</strong> {customer.name || 'Não informado'}</p>
+            <p><strong>Telefone:</strong> {customer.phone || 'Não informado'}</p>
+            <p><strong>Endereço:</strong> {
+              [customer.address?.street, customer.address?.number, customer.address?.neighborhood, customer.address?.city]
+                .filter(Boolean)
+                .join(', ') || 'Não informado'
+            }</p>
+            <p><strong>Observações:</strong> {customer.notes || 'Nenhuma'}</p>
+          </div>
+        </div>
       )}
 
       {currentView === 'orders-list' && (
         <div className="form-section">
           <h3>Lista de Pedidos</h3>
-          <p>Em desenvolvimento...</p>
+          <p>✅ Vite funcionando</p>
+          <p>✅ React funcionando</p>
+          <p>✅ Navegação funcionando</p>
+          <p>🔄 Componentes em desenvolvimento...</p>
         </div>
       )}
 
       {currentView === 'delivery-by-vehicle' && (
         <div className="form-section">
           <h3>Entregas por Veículo</h3>
-          <p>Em desenvolvimento...</p>
+          <p>✅ Sistema base funcionando</p>
+          <p>🔄 Integração com Supabase em desenvolvimento...</p>
         </div>
       )}
 
