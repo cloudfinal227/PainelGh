@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { orderService } from "../services/orderService";
 import {
   Package,
@@ -36,6 +36,7 @@ const OrdersList = () => {
         subscriptionRef.current.unsubscribe();
       }
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadOrders = async (showLoading = true) => {
