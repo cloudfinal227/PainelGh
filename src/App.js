@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './index.css';
 
 function App() {
   const [message, setMessage] = useState('Sistema carregando...');
 
-  React.useEffect(() => {
+  useEffect(() => {
     setMessage('GH Construção - Sistema Online!');
   }, []);
 
