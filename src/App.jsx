@@ -313,25 +313,31 @@ function App() {
     setSelectedPedido(null);
   };
 
-  // Filtrar pedidos por nome do cliente e motivo de cancelamento
+  // Formatar motivo de cancelamento
+  const formatarMotivo = (motivo) => {
+    const motivos = {
+      'nao-estava-em-casa': '🏠 Não estava em casa',
+      'endereco-incorreto': '📍 Endereço incorreto',
+      'cliente-desistiu': '🚫 Cliente desistiu',
+      'falta-de-material': '📦 Falta de material',
+      'problema-pagamento': '💳 Problema de pagamento',
+      'outro': '❓ Outro motivo'
+    };
+    return motivos[motivo] || motivo;
+  };
+
+  // Filtrar pedidos por nome do cliente e status
   const filteredOrders = orders.filter(order => {
     // Filtro por nome
     const matchesName = order.cliente_nome.toLowerCase().includes(searchTerm.toLowerCase());
     
-    // Filtro por motivo
-    let matchesMotivo = true;
+    // Filtro por status
+    let matchesStatus = true;
     if (filterMotivo) {
-      if (filterMotivo === 'cancelado') {
-        matchesMotivo = order.status === 'cancelado';
-      } else {
-        matchesMotivo = order.status === 'cancelado' && 
-                       order.cancelamentos && 
-                       order.cancelamentos.length > 0 &&
-                       order.cancelamentos[0].motivo === filterMotivo;
-      }
+      matchesStatus = order.status === filterMotivo;
     }
     
-    return matchesName && matchesMotivo;
+    return matchesName && matchesStatus;
   });
 
   if (loading) {
@@ -644,7 +650,7 @@ function App() {
                   )}
                 </div>
                 
-                {/* Filtro por Motivo de Cancelamento */}
+                {/* Filtro por Status */}
                 <div className="filter-wrapper">
                   <select
                     value={filterMotivo}
@@ -652,13 +658,11 @@ function App() {
                     className="filter-select"
                   >
                     <option value="">Todos os status</option>
-                    <option value="cancelado">❌ Apenas Cancelados</option>
-                    <option value="nao-estava-em-casa">🏠 Não estava em casa</option>
-                    <option value="endereco-incorreto">📍 Endereço incorreto</option>
-                    <option value="cliente-desistiu">🚫 Cliente desistiu</option>
-                    <option value="falta-de-material">📦 Falta de material</option>
-                    <option value="problema-pagamento">💳 Problema de pagamento</option>
-                    <option value="outro">❓ Outro motivo</option>
+                    <option value="pendente">⏳ Pendentes</option>
+                    <option value="preparando">🔄 Preparando</option>
+                    <option value="saiu-entrega">🚚 Saiu para Entrega</option>
+                    <option value="entregue">✅ Entregues</option>
+                    <option value="cancelado">❌ Cancelados</option>
                   </select>
                 </div>
               </div>
@@ -756,7 +760,7 @@ function App() {
                       {order.status === 'cancelado' && order.cancelamentos && order.cancelamentos.length > 0 && (
                         <div className="order-cancelamento-row">
                           <span className="cancelamento-motivo">
-                            ❌ Motivo: {order.cancelamentos[0].motivo}
+                            {formatarMotivo(order.cancelamentos[0].motivo)}
                           </span>
                           {order.cancelamentos[0].observacoes && (
                             <span className="cancelamento-obs">
