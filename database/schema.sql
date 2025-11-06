@@ -45,6 +45,29 @@ CREATE TABLE IF NOT EXISTS pedido_itens (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- ✍️ TABELA: comprovantes_entrega
+CREATE TABLE IF NOT EXISTS comprovantes_entrega (
+  id BIGSERIAL PRIMARY KEY,
+  pedido_id BIGINT REFERENCES pedidos(id) ON DELETE CASCADE,
+  nome_recebedor VARCHAR(255) NOT NULL,
+  assinatura_base64 TEXT NOT NULL, -- Assinatura digital em Base64
+  foto_comprovante TEXT, -- Foto opcional em Base64
+  observacoes TEXT,
+  latitude DECIMAL(10,8),
+  longitude DECIMAL(11,8),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- ❌ TABELA: cancelamentos
+CREATE TABLE IF NOT EXISTS cancelamentos (
+  id SERIAL PRIMARY KEY,
+  pedido_id INTEGER REFERENCES pedidos(id) ON DELETE CASCADE,
+  motivo VARCHAR(255) NOT NULL,
+  observacoes TEXT,
+  entregador_id INTEGER,
+  data_cancelamento TIMESTAMP WITHOUT TIME ZONE DEFAULT NOW()
+);
+
 -- Índices para melhor performance
 CREATE INDEX IF NOT EXISTS idx_materiais_nome ON materiais(nome);
 CREATE INDEX IF NOT EXISTS idx_materiais_nome_curto ON materiais(nome_curto);
@@ -53,6 +76,9 @@ CREATE INDEX IF NOT EXISTS idx_pedidos_status ON pedidos(status);
 CREATE INDEX IF NOT EXISTS idx_pedido_itens_pedido_id ON pedido_itens(pedido_id);
 CREATE INDEX IF NOT EXISTS idx_pedido_itens_material_id ON pedido_itens(material_id);
 CREATE INDEX IF NOT EXISTS idx_pedido_itens_veiculo_id ON pedido_itens(veiculo_id);
+CREATE INDEX IF NOT EXISTS idx_comprovantes_pedido_id ON comprovantes_entrega(pedido_id);
+CREATE INDEX IF NOT EXISTS idx_cancelamentos_pedido_id ON cancelamentos(pedido_id);
+CREATE INDEX IF NOT EXISTS idx_cancelamentos_motivo ON cancelamentos(motivo);
 
 -- Trigger para atualizar updated_at automaticamente
 CREATE OR REPLACE FUNCTION update_updated_at_column()
@@ -73,12 +99,16 @@ ALTER TABLE materiais ENABLE ROW LEVEL SECURITY;
 ALTER TABLE veiculos ENABLE ROW LEVEL SECURITY;
 ALTER TABLE pedidos ENABLE ROW LEVEL SECURITY;
 ALTER TABLE pedido_itens ENABLE ROW LEVEL SECURITY;
+ALTER TABLE comprovantes_entrega ENABLE ROW LEVEL SECURITY;
+ALTER TABLE cancelamentos ENABLE ROW LEVEL SECURITY;
 
 -- Permitir todas as operações para usuários autenticados
 CREATE POLICY "Enable all operations for authenticated users" ON materiais FOR ALL USING (true);
 CREATE POLICY "Enable all operations for authenticated users" ON veiculos FOR ALL USING (true);
 CREATE POLICY "Enable all operations for authenticated users" ON pedidos FOR ALL USING (true);
 CREATE POLICY "Enable all operations for authenticated users" ON pedido_itens FOR ALL USING (true);
+CREATE POLICY "Enable all operations for authenticated users" ON comprovantes_entrega FOR ALL USING (true);
+CREATE POLICY "Enable all operations for authenticated users" ON cancelamentos FOR ALL USING (true);
 
 -- 🎯 DADOS INICIAIS - VEÍCULOS
 INSERT INTO veiculos (nome, capacidade) VALUES 

@@ -12,8 +12,40 @@ Sistema de gerenciamento de entregas para materiais de construção.
 - ✅ Integração completa com Supabase
 - ✅ Visualização de pedidos salvos com joins
 - ✅ Controle de status de entregas
-- ✅ **NOVO**: Separação de entregas por veículo
-- ✅ **NOVO**: Painel do entregador com itens filtrados por veículo
+- ✅ Separação de entregas por veículo
+- ✅ Painel do entregador com itens filtrados por veículo
+- ✅ **NOVO**: Sistema de Comprovantes de Entrega
+  - 📝 Visualização de assinatura digital
+  - 📸 Foto do comprovante (opcional)
+  - 📍 Geolocalização da entrega
+  - 🪟 Modal responsivo e animado
+  - 🔒 Segurança com RLS
+
+## 📝 Sistema de Comprovantes
+
+O sistema agora inclui um módulo completo para gerenciamento de comprovantes de entrega:
+
+- **Painel Web**: Visualize comprovantes com assinatura digital e foto
+- **App Móvel**: Colete assinatura e foto no momento da entrega
+- **Rastreabilidade**: Registro completo de cada entrega
+- **Resolução de Disputas**: Prova visual de recebimento
+
+### 🚀 Comece Agora!
+
+**[👉 COMECE AQUI](COMECE_AQUI.md)** - Guia de início rápido em 5 minutos!
+
+### 📚 Documentação Completa
+
+Para informações detalhadas sobre o sistema de comprovantes, consulte:
+
+- **[📖 Índice da Documentação](INDICE_DOCUMENTACAO.md)** - Navegação completa
+- **[⚡ Instalação Rápida](INSTALACAO_RAPIDA.md)** - Setup completo
+- **[📝 Documentação Técnica](COMPROVANTES_ENTREGA.md)** - Detalhes completos
+- **[📱 Integração Mobile](INTEGRACAO_APP_MOBILE.md)** - Guia para app móvel
+- **[🎨 Guia Visual](GUIA_VISUAL.md)** - Design e fluxos
+- **[💼 Resumo Executivo](RESUMO_EXECUTIVO.md)** - Visão executiva
+- **[✅ Checklist](CHECKLIST_IMPLEMENTACAO.md)** - Controle de implementação
+- **[📋 Sumário Completo](SUMARIO_COMPLETO.md)** - Tudo que foi implementado
 
 ## Configuração do Banco de Dados (Supabase)
 

@@ -65,6 +65,12 @@ export const orderService = {
             *,
             materiais (nome, tipo_medida),
             veiculos (nome, capacidade)
+          ),
+          cancelamentos (
+            id,
+            motivo,
+            observacoes,
+            data_cancelamento
           )
         `)
         .order('created_at', { ascending: false })

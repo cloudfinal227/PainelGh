@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import './index.css';
 import { materialService } from './services/materialService.js';
 import { orderService } from './services/orderService.js';
+import { comprovanteService } from './services/comprovanteService.js';
+import ComprovanteModal from './components/ComprovanteModal.jsx';
 
 function App() {
   const [currentView, setCurrentView] = useState('new-order');
@@ -34,6 +36,14 @@ function App() {
   const [vehicles, setVehicles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [filterMotivo, setFilterMotivo] = useState(''); // Filtro por motivo de cancelamento
+  
+  // Estados para o modal de comprovante
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedComprovante, setSelectedComprovante] = useState(null);
+  const [selectedPedido, setSelectedPedido] = useState(null);
+  const [loadingComprovante, setLoadingComprovante] = useState(false);
+  const [comprovantesMap, setComprovantesMap] = useState({});
 
   const cities = [
     'Guarabira',
@@ -257,10 +267,72 @@ function App() {
     return ordersByVehicle;
   };
 
-  // Filtrar pedidos por nome do cliente
-  const filteredOrders = orders.filter(order => 
-    order.cliente_nome.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Verificar comprovantes para pedidos entregues
+  useEffect(() => {
+    const checkComprovantes = async () => {
+      const entregues = orders.filter(order => order.status === 'entregue');
+      const map = {};
+      
+      for (const order of entregues) {
+        const result = await comprovanteService.hasComprovante(order.id);
+        if (result.success) {
+          map[order.id] = result.hasComprovante;
+        }
+      }
+      
+      setComprovantesMap(map);
+    };
+
+    if (orders.length > 0) {
+      checkComprovantes();
+    }
+  }, [orders]);
+
+  // Abrir modal de comprovante
+  const handleViewComprovante = async (pedido) => {
+    setLoadingComprovante(true);
+    setIsModalOpen(true);
+    setSelectedPedido(pedido);
+    
+    const result = await comprovanteService.getComprovanteByPedidoId(pedido.id);
+    
+    if (result.success) {
+      setSelectedComprovante(result.data);
+    } else {
+      alert('Erro ao carregar comprovante: ' + result.error);
+      setIsModalOpen(false);
+    }
+    
+    setLoadingComprovante(false);
+  };
+
+  // Fechar modal
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedComprovante(null);
+    setSelectedPedido(null);
+  };
+
+  // Filtrar pedidos por nome do cliente e motivo de cancelamento
+  const filteredOrders = orders.filter(order => {
+    // Filtro por nome
+    const matchesName = order.cliente_nome.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    // Filtro por motivo
+    let matchesMotivo = true;
+    if (filterMotivo) {
+      if (filterMotivo === 'cancelado') {
+        matchesMotivo = order.status === 'cancelado';
+      } else {
+        matchesMotivo = order.status === 'cancelado' && 
+                       order.cancelamentos && 
+                       order.cancelamentos.length > 0 &&
+                       order.cancelamentos[0].motivo === filterMotivo;
+      }
+    }
+    
+    return matchesName && matchesMotivo;
+  });
 
   if (loading) {
     return (
@@ -550,7 +622,7 @@ function App() {
             <div className="orders-header">
               <h3>Lista de Pedidos ({filteredOrders.length}{searchTerm && ` de ${orders.length}`})</h3>
               
-              {/* Barra de Busca */}
+              {/* Barra de Busca e Filtros */}
               <div className="search-container">
                 <div className="search-input-wrapper">
                   <span className="search-icon">🔍</span>
@@ -570,6 +642,24 @@ function App() {
                       ✕
                     </button>
                   )}
+                </div>
+                
+                {/* Filtro por Motivo de Cancelamento */}
+                <div className="filter-wrapper">
+                  <select
+                    value={filterMotivo}
+                    onChange={(e) => setFilterMotivo(e.target.value)}
+                    className="filter-select"
+                  >
+                    <option value="">Todos os status</option>
+                    <option value="cancelado">❌ Apenas Cancelados</option>
+                    <option value="nao-estava-em-casa">🏠 Não estava em casa</option>
+                    <option value="endereco-incorreto">📍 Endereço incorreto</option>
+                    <option value="cliente-desistiu">🚫 Cliente desistiu</option>
+                    <option value="falta-de-material">📦 Falta de material</option>
+                    <option value="problema-pagamento">💳 Problema de pagamento</option>
+                    <option value="outro">❓ Outro motivo</option>
+                  </select>
                 </div>
               </div>
             </div>
@@ -661,6 +751,32 @@ function App() {
                           <span className="notes-compact">📝 {order.observacoes}</span>
                         </div>
                       )}
+
+                      {/* Motivo de Cancelamento (se cancelado) */}
+                      {order.status === 'cancelado' && order.cancelamentos && order.cancelamentos.length > 0 && (
+                        <div className="order-cancelamento-row">
+                          <span className="cancelamento-motivo">
+                            ❌ Motivo: {order.cancelamentos[0].motivo}
+                          </span>
+                          {order.cancelamentos[0].observacoes && (
+                            <span className="cancelamento-obs">
+                              💬 {order.cancelamentos[0].observacoes}
+                            </span>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Botão Ver Assinatura (apenas para pedidos entregues com comprovante) */}
+                      {order.status === 'entregue' && comprovantesMap[order.id] && (
+                        <div className="order-actions-row" style={{ marginTop: '10px', paddingTop: '10px', borderTop: '1px solid #e5e7eb' }}>
+                          <button 
+                            className="btn-view-signature"
+                            onClick={() => handleViewComprovante(order)}
+                          >
+                            📝 Ver Comprovante
+                          </button>
+                        </div>
+                      )}
                     </div>
                   );
                 })}
@@ -720,6 +836,14 @@ function App() {
           )}
         </div>
       )}
+
+      {/* Modal de Comprovante */}
+      <ComprovanteModal 
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        comprovante={loadingComprovante ? null : selectedComprovante}
+        pedido={selectedPedido}
+      />
 
       {/* Footer */}
       <div style={{ 
